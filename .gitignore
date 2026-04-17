@@ -1,0 +1,61 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# --- Virtualenv ---
+.venv/
+venv/
+env/
+ENV/
+
+# --- Testing / coverage ---
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.nox/
+.mypy_cache/
+.ruff_cache/
+
+# --- IDE / OS ---
+.idea/
+.vscode/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- Claude Code / internal tooling ---
+.claude/
+
+# --- Project data (regeneratable / not for repo) ---
+vectordb_storage/
+rag/data/pdfs/
+rag/data/*.pdf
+rag/data/raw/
+
+# --- Eval reports (auto-generated) ---
+eval_data/report.json
+
+# --- Team-internal planning docs ---
+Driving_Copilot_구현_가이드.docx
+*.hwp
+*.hwpx
+
+# --- Logs ---
+*.log
+logs/
+
+# --- Env ---
+.env
+.env.*
+!.env.example

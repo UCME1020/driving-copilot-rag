@@ -1,0 +1,384 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Driving Copilot — RAG Playground</title>
+  <style>
+    :root {
+      --bg: #0A0A0F;
+      --panel: #12131A;
+      --panel-2: #1A1C25;
+      --border: #262833;
+      --text: #E0E0E0;
+      --muted: #888A95;
+      --primary: #00B4D8;
+      --primary-dim: #007A93;
+      --alert: #FF4444;
+      --ok: #4CAF50;
+      --warn: #FFB020;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font: 15px/1.5 Inter, Pretendard, -apple-system, "Segoe UI", Roboto, sans-serif;
+    }
+    header {
+      display: flex; align-items: baseline; gap: 12px;
+      padding: 18px 24px;
+      border-bottom: 1px solid var(--border);
+    }
+    header h1 { margin: 0; font-size: 18px; letter-spacing: 0.2px; }
+    header .sub { color: var(--muted); font-size: 13px; }
+    header .right { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+    header a { color: var(--primary); text-decoration: none; font-size: 13px; }
+    header a:hover { text-decoration: underline; }
+
+    .dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+    .dot.ok { background: var(--ok); box-shadow: 0 0 6px var(--ok); }
+    .dot.bad { background: var(--alert); box-shadow: 0 0 6px var(--alert); }
+
+    main {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      padding: 16px 24px 24px;
+      min-height: calc(100% - 58px);
+    }
+    section.panel {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      display: flex; flex-direction: column;
+      min-height: 0;
+    }
+    section.panel > header {
+      border: 0; border-bottom: 1px solid var(--border);
+      padding: 14px 18px; gap: 8px;
+    }
+    section.panel > header h2 { margin: 0; font-size: 14px; letter-spacing: 0.3px; text-transform: uppercase; color: var(--muted); }
+    section.panel > .body { padding: 16px 18px; display: flex; flex-direction: column; gap: 12px; }
+
+    label { display: block; color: var(--muted); font-size: 12px; margin-bottom: 6px; }
+    textarea, input[type=text], input[type=number] {
+      width: 100%;
+      background: var(--panel-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      padding: 10px 12px;
+      font: inherit;
+      outline: none;
+    }
+    textarea { resize: vertical; min-height: 72px; }
+    textarea:focus, input:focus { border-color: var(--primary-dim); }
+
+    .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: end; }
+    .row > * { flex: 1 1 auto; }
+    .inline { display: flex; gap: 10px; align-items: center; }
+    .inline input[type=checkbox] { accent-color: var(--primary); }
+    .inline input[type=number] { width: 80px; flex: 0 0 auto; }
+
+    button {
+      background: var(--primary);
+      color: #001821;
+      border: 0;
+      border-radius: 6px;
+      padding: 10px 16px;
+      font: inherit;
+      font-weight: 600;
+      cursor: pointer;
+      min-width: 88px;
+    }
+    button:hover { background: #1EC7EB; }
+    button:active { transform: translateY(1px); }
+    button[disabled] { opacity: 0.5; cursor: not-allowed; }
+    button.secondary { background: var(--panel-2); color: var(--text); border: 1px solid var(--border); }
+    button.secondary:hover { background: var(--border); }
+
+    .examples { display: flex; flex-wrap: wrap; gap: 6px; }
+    .examples button { background: transparent; color: var(--muted); border: 1px dashed var(--border); padding: 4px 10px; font-size: 12px; border-radius: 14px; min-width: 0; }
+    .examples button:hover { color: var(--text); border-color: var(--primary-dim); }
+
+    .result {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 12px 14px;
+      white-space: pre-wrap;
+      word-break: break-word;
+    }
+    .route-card { display: grid; grid-template-columns: auto 1fr; gap: 4px 16px; align-items: baseline; }
+    .route-card .k { color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: 0.3px; }
+    .route-card .v { font-family: ui-monospace, "Cascadia Code", Consolas, monospace; font-size: 14px; }
+    .route-type { display: inline-block; padding: 2px 10px; border-radius: 999px; font-weight: 600; font-size: 13px; }
+    .route-type.rag { background: #004a66; color: #8fd9f0; }
+    .route-type.tool { background: #3d2e00; color: #ffd27a; }
+    .route-type.vision { background: #2a0047; color: #cfa3ff; }
+    .route-type.chat { background: #1f2a1d; color: #a0d9a0; }
+
+    .chunks { display: flex; flex-direction: column; gap: 10px; min-height: 0; overflow: auto; }
+    .chunk {
+      background: var(--panel-2);
+      border: 1px solid var(--border);
+      border-left: 3px solid var(--primary-dim);
+      border-radius: 6px;
+      padding: 12px 14px;
+    }
+    .chunk .meta {
+      display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px;
+      color: var(--muted); font-size: 12px;
+    }
+    .badge {
+      padding: 2px 8px; border-radius: 4px; font-size: 11px; letter-spacing: 0.2px;
+      background: var(--border); color: var(--text);
+    }
+    .badge.score { background: var(--primary-dim); color: #e5fbff; font-family: ui-monospace, monospace; }
+    .badge.ct-warning { background: #5a1a1a; color: #ffb8b8; }
+    .badge.ct-warning_light { background: #5a3d00; color: #ffd48a; }
+    .badge.ct-spec { background: #0f3d55; color: #a3d7ee; }
+    .badge.ct-general { background: var(--border); color: var(--muted); }
+    .chunk .text { font-size: 14px; line-height: 1.55; }
+
+    .error {
+      background: #3a0f10; color: #ffb6b7; border: 1px solid #5c1719;
+      padding: 10px 12px; border-radius: 6px; font-size: 13px;
+    }
+    .status-line { color: var(--muted); font-size: 12px; }
+
+    @media (max-width: 900px) {
+      main { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Driving Copilot — RAG Playground</h1>
+    <span class="sub">PART A 개발자용 데모</span>
+    <div class="right">
+      <span id="health-indicator" class="status-line"><span class="dot bad"></span> 연결 확인 중</span>
+      <a href="/docs" target="_blank">Swagger</a>
+      <a href="/redoc" target="_blank">ReDoc</a>
+    </div>
+  </header>
+
+  <main>
+    <!-- LEFT: Router -->
+    <section class="panel">
+      <header><h2>Query Router · POST /rag/route</h2></header>
+      <div class="body">
+        <div>
+          <label for="route-query">쿼리</label>
+          <textarea id="route-query" placeholder="예) 에어컨 켜줘">에어컨 켜줘</textarea>
+        </div>
+        <div class="row">
+          <div class="inline">
+            <input type="checkbox" id="route-has-image" />
+            <label for="route-has-image" style="margin: 0;">has_image</label>
+          </div>
+          <button id="route-run">Route</button>
+        </div>
+        <div class="examples" id="route-examples"></div>
+        <div class="status-line" id="route-status">대기 중</div>
+        <div id="route-result"></div>
+      </div>
+    </section>
+
+    <!-- RIGHT: Search -->
+    <section class="panel">
+      <header><h2>RAG Search · POST /rag/search</h2></header>
+      <div class="body">
+        <div>
+          <label for="search-query">쿼리</label>
+          <textarea id="search-query" placeholder="예) 엔진 경고등 점등">엔진 경고등 점등</textarea>
+        </div>
+        <div class="row">
+          <div class="inline">
+            <label for="search-topk" style="margin: 0;">top_k</label>
+            <input type="number" id="search-topk" min="1" max="20" value="3" />
+          </div>
+          <div class="inline">
+            <input type="checkbox" id="search-rerank" />
+            <label for="search-rerank" style="margin: 0;">rerank</label>
+          </div>
+          <button id="search-run">Search</button>
+        </div>
+        <div class="examples" id="search-examples"></div>
+        <div class="status-line" id="search-status">대기 중</div>
+        <div class="chunks" id="search-result"></div>
+      </div>
+    </section>
+  </main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const setText = (el, t) => { el.textContent = t; };
+
+const ROUTE_EXAMPLES = [
+  ["에어컨 켜줘", false],
+  ["엔진 경고등이 무슨 뜻이야", false],
+  ["앞에 뭐가 보여", false],
+  ["안녕", false],
+  ["이거 뭐야", true],
+  ["볼륨 좀 낮춰줘", false],
+  ["타이어 압력 기준 알려줘", false],
+];
+const SEARCH_EXAMPLES = [
+  "엔진 경고등 점등",
+  "오일 교환 주기",
+  "타이어 공기압",
+  "배터리 방전 점프",
+  "ABS 경고등",
+  "브레이크 패드 교체",
+  "에어백 작동 조건",
+];
+
+function renderExamples() {
+  const r = $("route-examples");
+  ROUTE_EXAMPLES.forEach(([q, img]) => {
+    const b = document.createElement("button");
+    b.textContent = img ? `${q}  [img]` : q;
+    b.onclick = () => { $("route-query").value = q; $("route-has-image").checked = img; runRoute(); };
+    r.appendChild(b);
+  });
+  const s = $("search-examples");
+  SEARCH_EXAMPLES.forEach((q) => {
+    const b = document.createElement("button");
+    b.textContent = q;
+    b.onclick = () => { $("search-query").value = q; runSearch(); };
+    s.appendChild(b);
+  });
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function renderRoute(data) {
+  const t = (data.route_type || "").toLowerCase();
+  return `
+    <div class="result route-card">
+      <div class="k">route_type</div>
+      <div class="v"><span class="route-type ${escapeHtml(t)}">${escapeHtml(data.route_type)}</span></div>
+      <div class="k">confidence</div>
+      <div class="v">${Number(data.confidence).toFixed(3)}</div>
+      <div class="k">matched_rule</div>
+      <div class="v">${data.matched_rule === null || data.matched_rule === undefined ? '<span style="color:var(--muted)">— (ML 폴백)</span>' : escapeHtml(data.matched_rule)}</div>
+    </div>
+  `;
+}
+
+function renderChunk(chunk, score) {
+  const ct = (chunk.content_type || "general").toLowerCase();
+  return `
+    <div class="chunk">
+      <div class="meta">
+        <span class="badge score">${Number(score).toFixed(3)}</span>
+        <span class="badge">${escapeHtml(chunk.source)} · p.${chunk.page_num}</span>
+        ${chunk.section ? `<span class="badge">${escapeHtml(chunk.section)}</span>` : ""}
+        <span class="badge ct-${escapeHtml(ct)}">${escapeHtml(ct)}</span>
+        <span class="badge" style="color:var(--muted)">${escapeHtml(chunk.chunk_id)}</span>
+      </div>
+      <div class="text">${escapeHtml(chunk.content)}</div>
+    </div>
+  `;
+}
+
+async function post(url, body) {
+  const started = performance.now();
+  const res = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const ms = (performance.now() - started).toFixed(0);
+  let data;
+  const ct = res.headers.get("Content-Type") || "";
+  if (ct.includes("application/json")) data = await res.json();
+  else data = { error: await res.text() };
+  return { ok: res.ok, status: res.status, data, ms };
+}
+
+async function runRoute() {
+  const btn = $("route-run"); btn.disabled = true;
+  const query = $("route-query").value;
+  const has_image = $("route-has-image").checked;
+  setText($("route-status"), "요청 중…");
+  $("route-result").innerHTML = "";
+  try {
+    const { ok, status, data, ms } = await post("/rag/route", { query, has_image });
+    if (!ok) {
+      $("route-result").innerHTML = `<div class="error">HTTP ${status}: ${escapeHtml(JSON.stringify(data))}</div>`;
+      setText($("route-status"), `실패 · ${ms}ms`);
+    } else {
+      $("route-result").innerHTML = renderRoute(data);
+      setText($("route-status"), `OK · ${ms}ms`);
+    }
+  } catch (e) {
+    $("route-result").innerHTML = `<div class="error">${escapeHtml(e.message || String(e))}</div>`;
+    setText($("route-status"), "네트워크 오류");
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function runSearch() {
+  const btn = $("search-run"); btn.disabled = true;
+  const query = $("search-query").value;
+  const top_k = Number($("search-topk").value) || 3;
+  const rerank = $("search-rerank").checked;
+  setText($("search-status"), "요청 중…");
+  $("search-result").innerHTML = "";
+  try {
+    const { ok, status, data, ms } = await post("/rag/search", { query, top_k, rerank });
+    if (!ok) {
+      $("search-result").innerHTML = `<div class="error">HTTP ${status}: ${escapeHtml(JSON.stringify(data))}</div>`;
+      setText($("search-status"), `실패 · ${ms}ms`);
+      return;
+    }
+    const chunks = data.chunks || [];
+    const scores = data.scores || [];
+    if (chunks.length === 0) {
+      $("search-result").innerHTML = `<div class="status-line">결과 없음 (인덱스에 청크가 있는지 확인)</div>`;
+    } else {
+      $("search-result").innerHTML = chunks.map((c, i) => renderChunk(c, scores[i] ?? 0)).join("");
+    }
+    setText($("search-status"), `OK · ${chunks.length}건 · ${ms}ms`);
+  } catch (e) {
+    $("search-result").innerHTML = `<div class="error">${escapeHtml(e.message || String(e))}</div>`;
+    setText($("search-status"), "네트워크 오류");
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+async function pingHealth() {
+  const el = $("health-indicator");
+  try {
+    const res = await fetch("/health");
+    if (res.ok) el.innerHTML = `<span class="dot ok"></span> /health ok`;
+    else el.innerHTML = `<span class="dot bad"></span> /health ${res.status}`;
+  } catch {
+    el.innerHTML = `<span class="dot bad"></span> /health 실패`;
+  }
+}
+
+// wire up
+$("route-run").onclick = runRoute;
+$("search-run").onclick = runSearch;
+// Ctrl/Cmd+Enter in textareas runs the respective action
+$("route-query").addEventListener("keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); runRoute(); }
+});
+$("search-query").addEventListener("keydown", (e) => {
+  if ((e.ctrlKey || e.metaKey) && e.key === "Enter") { e.preventDefault(); runSearch(); }
+});
+
+renderExamples();
+pingHealth();
+setInterval(pingHealth, 5000);
+</script>
+</body>
+</html>

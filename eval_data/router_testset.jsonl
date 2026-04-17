@@ -1,0 +1,20 @@
+{"query": "엔진 경고등이 무슨 뜻이야", "route": "rag", "has_image": false}
+{"query": "오일 교환 주기 알려줘", "route": "rag", "has_image": false}
+{"query": "타이어 공기압 기준이 뭐야", "route": "rag", "has_image": false}
+{"query": "브레이크 패드 교체 주기 알려줘", "route": "rag", "has_image": false}
+{"query": "ABS 경고등 점등 원인이 궁금해", "route": "rag", "has_image": false}
+{"query": "온도 24도로 맞춰줘", "route": "tool", "has_image": false}
+{"query": "에어컨 켜줘", "route": "tool", "has_image": false}
+{"query": "창문 조금 열어줘", "route": "tool", "has_image": false}
+{"query": "노래 틀어줘", "route": "tool", "has_image": false}
+{"query": "뒷좌석 열선 켜줘", "route": "tool", "has_image": false}
+{"query": "앞에 뭐가 보여", "route": "vision", "has_image": false}
+{"query": "지금 상황 설명해줘", "route": "vision", "has_image": false}
+{"query": "카메라 보이는거 알려줘", "route": "vision", "has_image": false}
+{"query": "신호등 색깔 뭐야", "route": "vision", "has_image": true}
+{"query": "이 사진 뭐야", "route": "vision", "has_image": true}
+{"query": "안녕", "route": "chat", "has_image": false}
+{"query": "고마워", "route": "chat", "has_image": false}
+{"query": "잘 자", "route": "chat", "has_image": false}
+{"query": "오늘 기분 어때", "route": "chat", "has_image": false}
+{"query": "너 이름이 뭐야", "route": "chat", "has_image": false}
