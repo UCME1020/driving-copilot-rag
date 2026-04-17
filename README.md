@@ -1,7 +1,7 @@
 # Driving Copilot — PART A (RAG Engineer)
 
 On-Device Multimodal Driving Copilot 프로젝트의 RAG 모듈.
-GPU 없이 CPU 환경에서 독립 개발 가능하도록 구성했다.
+GPU 없이 CPU 환경에서 독립 개발 가능하도록 구성
 
 ## 구조
 
@@ -84,7 +84,7 @@ export RAG_RERANKER=cross
 export RAG_RERANKER_MODEL="BAAI/bge-reranker-base"
 export RAG_RERANKER_DEVICE=cuda             # PM GPU 서버
 ```
-> 임베딩 차원이 바뀌면 기존 Qdrant 컬렉션을 `QdrantStore.reset()`으로 재생성 후 재인덱싱한다.
+> 임베딩 차원이 바뀌면 기존 Qdrant 컬렉션을 `QdrantStore.reset()`으로 재생성 후 재인덱싱
 
 ## 통합 API Contract (guide 준수)
 
