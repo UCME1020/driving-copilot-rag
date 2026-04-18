@@ -85,7 +85,7 @@ ul.fl li strong{color:var(--text)}
     <a class="nav-item" onclick="go('eval')">10. 품질 평가 체계</a>
   </div>
   <div class="nav-section"><div class="nav-section-title">Part E · 실행</div>
-    <a class="nav-item" onclick="go('schedule')">11. 일정 (16주)</a>
+    <a class="nav-item" onclick="go('schedule')">11. 일정 (12주)</a>
     <a class="nav-item" onclick="go('techstack')">12. 기술 스택</a>
     <a class="nav-item" onclick="go('ref')">13. 참고 문헌</a>
   </div>
@@ -97,7 +97,7 @@ ul.fl li strong{color:var(--text)}
 <h2>1.1 프로젝트 정의</h2>
 <p class="lead"><strong>On-Device Multimodal Driving Copilot</strong>은 차량 내부 임베디드 환경에서 카메라 영상, 운전자 텍스트/음성, 차량 매뉴얼, 차량 센서 데이터를 통합 처리하여 실시간 운전 보조 응답을 생성하는 On-Device MLLM 시스템이다.</p>
 <div class="keyword-bar"><span class="label">핵심 기술</span>TensorRT Edge-LLM · Qwen2-VL · ReAct · Reflexion · Plan-and-Execute · Multi-Agent(A2A) · LangGraph · Agentic RAG · Graph RAG(Neo4j) · Text2SQL · MCP · CRAG · LLM-as-a-Judge · AG-UI</div>
-<div class="info-box"><div class="boxtitle">프로젝트 기본 정보</div><p>기간: 2026.05 ~ 2026.08 (16주) &nbsp;|&nbsp; 환경: NVIDIA A6000 48GB, Ubuntu x86</p></div>
+<div class="info-box"><div class="boxtitle">프로젝트 기본 정보</div><p>기간: 2026.05 ~ 2026.07 (12주) &nbsp;|&nbsp; 환경: NVIDIA A6000 48GB, Ubuntu x86</p></div>
 <div class="pn"><span></span><a onclick="go('goals')">다음: 핵심 목표 →</a></div>
 </div>
 
@@ -165,13 +165,13 @@ ul.fl li strong{color:var(--text)}
 <div class="table-wrap"><table><thead><tr><th>메트릭</th><th>정의</th><th>목표</th></tr></thead><tbody><tr><td>Faithfulness</td><td>응답이 컨텍스트에 근거한 비율</td><td>&gt; 0.90</td></tr><tr><td>Answer Relevancy</td><td>응답이 질문에 적합한 정도</td><td>&gt; 0.85</td></tr><tr><td>Context Recall</td><td>필요 컨텍스트 검색 비율</td><td>&gt; 0.90</td></tr><tr><td>Context Precision</td><td>검색 중 실제 관련 비율</td><td>&gt; 0.75</td></tr><tr><td>Text2SQL Accuracy</td><td>SQL 결과 기대값 일치</td><td>&gt; 80%</td></tr><tr><td>Graph RAG Accuracy</td><td>탐색 경로 일치</td><td>&gt; 85%</td></tr></tbody></table></div>
 <div class="pn"><a onclick="go('toolcall')">← Tool Calling</a><a onclick="go('schedule')">일정 →</a></div></div>
 
-<div class="page" id="p-schedule"><h1>11. 프로젝트 일정 (16주)</h1>
+<div class="page" id="p-schedule"><h1>11. 프로젝트 일정 (12주)</h1>
 <div class="table-wrap"><table><thead><tr><th>Phase</th><th>기간</th><th>주요 활동</th><th>산출물</th></tr></thead><tbody>
 <tr><td><span class="pb">Phase 1</span><br>VLM 배포</td><td>1~2주</td><td>TensorRT Edge-LLM 7B+1.5B, vLLM, Plan-and-Execute, 벤치마크</td><td>TensorRT 엔진, vLLM, 라우팅, 비용 리포트</td></tr>
-<tr><td><span class="pb">Phase 2</span><br>RAG+Graph+SQL</td><td>3~6주</td><td>Vehicle RAG, KG(Neo4j), Graph RAG, Text2SQL, Query Router</td><td>RAG+Graph RAG, KG, Text2SQL, DB</td></tr>
-<tr><td><span class="pb">Phase 3</span><br>Cog+A2A+Tool</td><td>7~10주</td><td>ReAct+Reflexion, Multi-Agent, A2A, MCP 12종, Multi-Turn, 메모리, 트리거</td><td>Cognitive Arch., A2A, MCP, 메모리</td></tr>
-<tr><td><span class="pb">Phase 4</span><br>평가 체계</td><td>11~12주</td><td>LLM-as-a-Judge, Hallucination, CRAG, Gold Set 200건, 대시보드</td><td>Gold Set, 평가 파이프라인, 대시보드</td></tr>
-<tr><td><span class="pb">Phase 5</span><br>통합+데모</td><td>13~16주</td><td>E2E 통합, React UI, AG-UI, 시나리오 8종, 리포트, 포트폴리오</td><td>통합 시스템, 데모, 리포트</td></tr>
+<tr><td><span class="pb">Phase 2</span><br>RAG+Graph+SQL</td><td>3~5주</td><td>Vehicle RAG, KG(Neo4j), Graph RAG, Text2SQL, Query Router</td><td>RAG+Graph RAG, KG, Text2SQL, DB</td></tr>
+<tr><td><span class="pb">Phase 3</span><br>Cog+A2A+Tool</td><td>6~8주</td><td>ReAct+Reflexion, Multi-Agent, A2A, MCP 12종, Multi-Turn, 메모리, 트리거</td><td>Cognitive Arch., A2A, MCP, 메모리</td></tr>
+<tr><td><span class="pb">Phase 4</span><br>평가 체계</td><td>9~10주</td><td>LLM-as-a-Judge, Hallucination, CRAG, Gold Set 200건, 대시보드</td><td>Gold Set, 평가 파이프라인, 대시보드</td></tr>
+<tr><td><span class="pb">Phase 5</span><br>통합+데모</td><td>11~12주</td><td>E2E 통합, React UI, AG-UI, 시나리오 8종, 리포트, 포트폴리오</td><td>통합 시스템, 데모, 리포트</td></tr>
 </tbody></table></div>
 <div class="info-box"><div class="boxtitle">Optional: Domain Fine-tuning (추가 2~4주)</div><p>nuScenes-QA 데이터셋 + QLoRA 파인튜닝 (A6000 48GB). base vs fine-tuned A/B 비교.</p></div>
 <div class="pn"><a onclick="go('eval')">← 평가 체계</a><a onclick="go('techstack')">기술 스택 →</a></div></div>
