@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>On-Device Multimodal Driving Copilot </title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Playfair+Display:wght@700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#FAFBFC;--sidebar-bg:#F1F3F5;--sidebar-active:#E8F4FD;--sidebar-border:#DEE2E6;--text:#212529;--text-s:#495057;--text-m:#868E96;--primary:#1864AB;--primary-l:#D0EBFF;--primary-d:#0B3D6E;--accent:#E8590C;--border:#E9ECEF;--stripe:#F8F9FA;--radius:6px}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Noto Sans KR',-apple-system,sans-serif;background:var(--bg);color:var(--text);line-height:1.8;font-size:15px}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:300px;min-width:300px;background:var(--sidebar-bg);border-right:1px solid var(--sidebar-border);position:sticky;top:0;height:100vh;overflow-y:auto;z-index:100;transition:transform .3s}
+.sidebar::-webkit-scrollbar{width:4px}.sidebar::-webkit-scrollbar-thumb{background:var(--sidebar-border);border-radius:2px}
+.sidebar-header{padding:24px 20px 16px;border-bottom:1px solid var(--sidebar-border)}
+.sidebar-header .logo{font-family:'Playfair Display',serif;font-size:13px;color:var(--text-m);text-transform:uppercase;letter-spacing:2px;margin-bottom:8px}
+.sidebar-header .title{font-size:16px;font-weight:700;color:var(--primary-d);line-height:1.4}
+.sidebar-header .subtitle{font-size:12px;color:var(--text-m);margin-top:4px}
+.nav-section{padding:12px 0}.nav-section-title{padding:8px 20px;font-size:11px;font-weight:700;color:var(--text-m);text-transform:uppercase;letter-spacing:1.5px}
+.nav-item{display:block;padding:7px 20px 7px 24px;font-size:13.5px;color:var(--text-s);text-decoration:none;cursor:pointer;transition:all .15s;border-left:3px solid transparent}
+.nav-item:hover{background:rgba(24,100,171,.05);color:var(--primary)}
+.nav-item.active{background:var(--sidebar-active);color:var(--primary);border-left-color:var(--primary);font-weight:600}
+.nav-item.sub{padding-left:40px;font-size:13px;color:var(--text-m)}.nav-item.sub:hover,.nav-item.sub.active{color:var(--primary)}
+.content-area{flex:1;max-width:860px;margin:0 auto;padding:48px 48px 120px}
+.hamburger{display:none;position:fixed;top:16px;left:16px;z-index:200;width:40px;height:40px;background:#fff;border:1px solid var(--border);border-radius:8px;cursor:pointer;align-items:center;justify-content:center;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.hamburger span{display:block;width:18px;height:2px;background:var(--text);position:relative}
+.hamburger span::before,.hamburger span::after{content:'';position:absolute;width:18px;height:2px;background:var(--text)}
+.hamburger span::before{top:-6px}.hamburger span::after{top:6px}
+.page{display:none}.page.active{display:block;animation:fadeIn .3s ease}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+h1{font-size:32px;font-weight:700;color:var(--primary-d);margin-bottom:12px;padding-bottom:16px;border-bottom:3px solid var(--primary);line-height:1.3}
+h2{font-size:22px;font-weight:700;color:var(--primary);margin:40px 0 16px;padding-bottom:8px;border-bottom:1px solid var(--border)}
+h3{font-size:17px;font-weight:600;color:var(--text);margin:28px 0 12px}
+p{margin-bottom:14px;color:var(--text-s)}strong{color:var(--text);font-weight:600}
+.lead{font-size:17px;color:var(--text-s);margin-bottom:24px;line-height:1.9}
+.keyword-bar{background:linear-gradient(135deg,var(--primary-d),var(--primary));color:#fff;padding:16px 20px;border-radius:var(--radius);margin:20px 0 28px;font-size:13.5px;line-height:2;letter-spacing:.3px}
+.keyword-bar .label{font-weight:700;font-size:12px;text-transform:uppercase;letter-spacing:1.5px;opacity:.8;display:block;margin-bottom:6px}
+.info-box{background:var(--primary-l);border-left:4px solid var(--primary);padding:16px 20px;border-radius:0 var(--radius) var(--radius) 0;margin:20px 0}
+.info-box .boxtitle{font-weight:700;color:var(--primary-d);margin-bottom:4px;font-size:14px}.info-box p{margin:0;font-size:14px;color:var(--text-s)}
+.table-wrap{overflow-x:auto;margin:16px 0 24px}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+thead th{background:var(--primary);color:#fff;padding:10px 14px;text-align:left;font-weight:600;font-size:13px}
+thead th:first-child{border-radius:var(--radius) 0 0 0}thead th:last-child{border-radius:0 var(--radius) 0 0}
+tbody td{padding:10px 14px;border-bottom:1px solid var(--border);color:var(--text-s);vertical-align:top}
+tbody tr:nth-child(even){background:var(--stripe)}tbody td:first-child{font-weight:500;color:var(--text)}
+ul.fl{list-style:none;padding:0;margin:12px 0 24px}
+ul.fl li{padding:8px 0 8px 20px;position:relative;color:var(--text-s);font-size:14.5px}
+ul.fl li::before{content:'';position:absolute;left:0;top:15px;width:8px;height:8px;background:var(--primary);border-radius:50%}
+ul.fl li strong{color:var(--text)}
+.gc{background:#fff;border:1px solid var(--border);border-radius:var(--radius);padding:24px;margin:20px 0;box-shadow:0 1px 3px rgba(0,0,0,.06)}
+.gc .gt{font-size:17px;font-weight:700;color:var(--primary-d);margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.gc .gt .badge{background:var(--primary);color:#fff;font-size:11px;font-weight:700;padding:2px 10px;border-radius:12px}
+.gc .desc{font-size:14.5px;color:var(--text-s);line-height:1.8;margin-bottom:16px}
+.pb{display:inline-block;background:var(--accent);color:#fff;font-size:11px;font-weight:700;padding:3px 12px;border-radius:12px;margin-bottom:8px}
+.pn{display:flex;justify-content:space-between;margin-top:60px;padding-top:24px;border-top:1px solid var(--border)}
+.pn a{color:var(--primary);text-decoration:none;font-size:14px;font-weight:500;cursor:pointer}.pn a:hover{color:var(--primary-d)}
+@media(max-width:900px){.sidebar{position:fixed;transform:translateX(-100%)}.sidebar.open{transform:translateX(0)}.hamburger{display:flex}.content-area{padding:48px 24px 120px}}
+</style>
+</head>
+<body>
+<button class="hamburger" onclick="document.querySelector('.sidebar').classList.toggle('open')"><span></span></button>
+<div class="layout">
+<nav class="sidebar">
+  <div class="sidebar-header">
+    <div class="title">On-Device Multimodal<br>Driving Copilot</div>
+    <div class="subtitle">프로젝트 계획서 · 2026</div>
+  </div>
+  <div class="nav-section"><div class="nav-section-title">Part A · 프로젝트 설계</div>
+    <a class="nav-item active" onclick="go('overview')">01. 프로젝트 개요</a>
+    <a class="nav-item sub" onclick="go('goals')">01-2. 핵심 목표 (G1~G5)</a>
+  </div>
+  <div class="nav-section"><div class="nav-section-title">Part B · 시스템 아키텍처</div>
+    <a class="nav-item" onclick="go('protocol')">02. 프로토콜 3층 구조</a>
+    <a class="nav-item" onclick="go('react')">03. ReAct Cognitive Architecture</a>
+    <a class="nav-item" onclick="go('agent')">04. A2A Multi-Agent</a>
+    <a class="nav-item" onclick="go('planexec')">05. Plan-and-Execute</a>
+    <a class="nav-item" onclick="go('memory')">06. 메모리 시스템</a>
+  </div>
+  <div class="nav-section"><div class="nav-section-title">Part C · 지식 시스템</div>
+    <a class="nav-item" onclick="go('graphrag')">07. Knowledge Graph + Graph RAG</a>
+    <a class="nav-item" onclick="go('text2sql')">08. Text2SQL Agent</a>
+  </div>
+  <div class="nav-section"><div class="nav-section-title">Part D · Tool & 평가</div>
+    <a class="nav-item" onclick="go('toolcall')">09. Multi-Turn Tool Calling</a>
+    <a class="nav-item" onclick="go('eval')">10. 품질 평가 체계</a>
+  </div>
+  <div class="nav-section"><div class="nav-section-title">Part E · 실행</div>
+    <a class="nav-item" onclick="go('schedule')">11. 일정 (16주)</a>
+    <a class="nav-item" onclick="go('techstack')">12. 기술 스택</a>
+    <a class="nav-item" onclick="go('ref')">13. 참고 문헌</a>
+  </div>
+</nav>
+<main class="content-area">
+
+<div class="page active" id="p-overview">
+<h1>01. 프로젝트 개요</h1>
+<h2>1.1 프로젝트 정의</h2>
+<p class="lead"><strong>On-Device Multimodal Driving Copilot</strong>은 차량 내부 임베디드 환경에서 카메라 영상, 운전자 텍스트/음성, 차량 매뉴얼, 차량 센서 데이터를 통합 처리하여 실시간 운전 보조 응답을 생성하는 On-Device MLLM 시스템이다.</p>
+<div class="keyword-bar"><span class="label">핵심 기술</span>TensorRT Edge-LLM · Qwen2-VL · ReAct · Reflexion · Plan-and-Execute · Multi-Agent(A2A) · LangGraph · Agentic RAG · Graph RAG(Neo4j) · Text2SQL · MCP · CRAG · LLM-as-a-Judge · AG-UI</div>
+<div class="info-box"><div class="boxtitle">프로젝트 기본 정보</div><p>기간: 2026.05 ~ 2026.08 (16주) &nbsp;|&nbsp; 환경: NVIDIA A6000 48GB, Ubuntu x86</p></div>
+<div class="pn"><span></span><a onclick="go('goals')">다음: 핵심 목표 →</a></div>
+</div>
+
+<div class="page" id="p-goals">
+<h1>01-2. 핵심 목표</h1>
+<div class="gc"><div class="gt"><span class="badge">G1</span>On-Device VLM 배포 + 비용 최적화</div><div class="desc">TensorRT Edge-LLM으로 Qwen2-VL 7B와 1.5B를 각각 INT4(AWQ) 양자화하여 A6000에서 로컬 추론 환경을 구축한다. Plan-and-Execute 패턴을 적용하여 Supervisor Agent(7B)가 계획과 복잡한 판단만 담당하고, 단순한 Tool 호출이나 검색 실행은 1.5B Executor가 처리하는 구조로 평균 토큰 비용을 절감한다.</div>
+<div class="table-wrap"><table><thead><tr><th>지표</th><th>목표</th><th>측정 방법</th></tr></thead><tbody><tr><td>First Token Latency</td><td>&lt; 2초</td><td>TensorRT 벤치마크 (7B INT4, A6000)</td></tr><tr><td>토큰 생성 속도</td><td>&gt; 15 tok/s</td><td>vLLM 프로파일러</td></tr><tr><td>양자화 모델 크기</td><td>&lt; 5GB VRAM</td><td>nvidia-smi</td></tr><tr><td>7B 호출 비율</td><td>&lt; 40%</td><td>100건 테스트 쿼리 라우팅 로그</td></tr></tbody></table></div></div>
+
+<div class="gc"><div class="gt"><span class="badge">G2</span>차량 도메인 지식 시스템</div><div class="desc">사용자 질문의 성격에 따라 세 가지 지식 경로를 자동 분기한다. 매뉴얼 질문은 Vector RAG, 관계 추론 질문은 Graph RAG, 데이터 조회 질문은 Text2SQL Agent가 처리한다. CRAG가 검색 품질을 자동 보정한다.</div>
+<div class="table-wrap"><table><thead><tr><th>지표</th><th>목표</th><th>측정 방법</th></tr></thead><tbody><tr><td>매뉴얼 QA 정확도</td><td>&gt; 85%</td><td>Gold Set 100문항</td></tr><tr><td>Retrieval Recall@5</td><td>&gt; 90%</td><td>정답 청크 Top-5 포함</td></tr><tr><td>Text2SQL 정확도</td><td>&gt; 75%</td><td>40문항 Exact Match</td></tr><tr><td>Graph RAG 정확도</td><td>&gt; 80%</td><td>30문항 경로 일치율</td></tr></tbody></table></div></div>
+
+<div class="gc"><div class="gt"><span class="badge">G3</span>Cognitive Agent 시스템</div><div class="desc">4개 특화 Agent가 A2A 프로토콜로 통신하며 역할을 분담. ReAct 루프 제어, 멀티모달 트리거, Multi-Turn Tool Calling을 포함한다.</div>
+<div class="table-wrap"><table><thead><tr><th>지표</th><th>목표</th><th>측정 방법</th></tr></thead><tbody><tr><td>단일 Tool-Call 정확도</td><td>&gt; 90%</td><td>50건 Exact Match</td></tr><tr><td>멀티모달 트리거 Precision</td><td>&gt; 80%</td><td>영상 30건</td></tr><tr><td>Multi-Turn 완수율</td><td>&gt; 80%</td><td>20건 VehicleState 일치</td></tr></tbody></table></div></div>
+
+<div class="gc"><div class="gt"><span class="badge">G4</span>AI Agent 품질 평가 체계</div><div class="desc">LLM-as-a-Judge 자동 채점, Hallucination Detection, CRAG, Gold Set 200건, RAG 품질 메트릭 대시보드를 구축한다.</div>
+<div class="table-wrap"><table><thead><tr><th>지표</th><th>목표</th><th>측정 방법</th></tr></thead><tbody><tr><td>Faithfulness</td><td>&gt; 0.85</td><td>RAGAS 자동 계산</td></tr><tr><td>Hallucination 탐지율</td><td>&gt; 85%</td><td>adversarial 50건</td></tr><tr><td>CRAG Recall 향상</td><td>&gt; 10%p</td><td>보정 전후 비교</td></tr></tbody></table></div></div>
+
+<div class="gc"><div class="gt"><span class="badge">G5</span>End-to-End 통합 데모</div><div class="desc">카메라 → VLM → Agent → RAG/Graph/SQL/Tool → React UI 전체 파이프라인. 8개 시나리오 커버.</div>
+<div class="table-wrap"><table><thead><tr><th>지표</th><th>목표</th><th>측정 방법</th></tr></thead><tbody><tr><td>E2E 시나리오</td><td>8개 전체</td><td>녹화 + 로그</td></tr><tr><td>단순 응답</td><td>&lt; 3초</td><td>타임스탬프</td></tr><tr><td>복합 응답</td><td>&lt; 8초</td><td>타임스탬프</td></tr></tbody></table></div></div>
+<div class="pn"><a onclick="go('overview')">← 프로젝트 정의</a><a onclick="go('protocol')">프로토콜 3층 →</a></div>
+</div>
+
+<div class="page" id="p-protocol"><h1>02. 프로토콜 3층 구조</h1><p class="lead">시스템 통신을 MCP(수직), A2A(수평), AG-UI(프론트) 3개 계층으로 표준화한다.</p>
+<div class="table-wrap"><table><thead><tr><th>프로토콜</th><th>역할</th><th>적용 범위</th></tr></thead><tbody><tr><td>MCP (수직)</td><td>Agent → Tool/Data 연결</td><td>12종 Vehicle Tool, Qdrant, Neo4j, DB</td></tr><tr><td>A2A (수평)</td><td>Agent → Agent 통신. Agent Card 기반 동적 발견</td><td>Supervisor ↔ Perception / Knowledge / Execution</td></tr><tr><td>AG-UI (프론트)</td><td>Agent → Frontend 스트리밍</td><td>WebSocket 토큰, Tool 결과 카드, 대시보드</td></tr></tbody></table></div>
+<div class="pn"><a onclick="go('goals')">← 핵심 목표</a><a onclick="go('react')">ReAct →</a></div></div>
+
+<div class="page" id="p-react"><h1>03. ReAct Cognitive Architecture</h1><p class="lead">Perceive → Reason → Act → Observe → Reflect 반복 루프. Reflexion으로 실패 경험을 장기 메모리에 축적.</p>
+<div class="table-wrap"><table><thead><tr><th>단계</th><th>설명</th><th>구현</th><th>예시</th></tr></thead><tbody><tr><td>Perceive</td><td>입력+카메라+차량 통합 인지</td><td>Router + VLM + State</td><td>"비 오는데 창문 열려있어"</td></tr><tr><td>Reason</td><td>CoT 추론, 계획 수립</td><td>LLM CoT + 플래닝</td><td>"비+창문 → 닫기+와이퍼"</td></tr><tr><td>Act</td><td>액션 실행</td><td>MCP + RAG + SQL + Graph</td><td>window → wiper</td></tr><tr><td>Observe</td><td>성공/실패 판단</td><td>Result 검증 + State</td><td>창문 ✓, 와이퍼 실패→재시도</td></tr><tr><td>Reflect</td><td>전략 수정 → 메모리 저장</td><td>자기평가 + Experience</td><td>"speed 확인 필요" → 저장</td></tr></tbody></table></div>
+<div class="pn"><a onclick="go('protocol')">← 프로토콜</a><a onclick="go('agent')">A2A Agent →</a></div></div>
+
+<div class="page" id="p-agent"><h1>04. A2A Multi-Agent</h1><p class="lead">각 Agent를 A2A Server로 배포. Supervisor가 Agent Card 통해 동적 발견·호출. LangGraph StateGraph 오케스트레이션.</p>
+<div class="table-wrap"><table><thead><tr><th>Agent</th><th>역할</th><th>A2A Skill</th><th>MCP Tool</th></tr></thead><tbody><tr><td>Supervisor</td><td>ReAct, Plan-and-Execute, Reflexion</td><td>plan, delegate, evaluate</td><td>- (위임)</td></tr><tr><td>Perception</td><td>영상 분석, 환경 감지, 트리거</td><td>analyze_scene, detect</td><td>VLM, camera</td></tr><tr><td>Knowledge</td><td>RAG, Graph RAG, Text2SQL</td><td>search, query_db, traverse</td><td>Qdrant, Neo4j, DB</td></tr><tr><td>Execution</td><td>Tool 실행, Multi-Turn, 재시도</td><td>execute, verify</td><td>12종 Vehicle Tool</td></tr></tbody></table></div>
+<div class="pn"><a onclick="go('react')">← ReAct</a><a onclick="go('planexec')">Plan-Execute →</a></div></div>
+
+<div class="page" id="p-planexec"><h1>05. Plan-and-Execute 모델 라우팅</h1><p class="lead">7B Planner가 계획, 1.5B Executor가 실행. 평균 토큰 비용 60~70% 절감.</p>
+<div class="table-wrap"><table><thead><tr><th>역할</th><th>모델</th><th>담당</th><th>특성</th></tr></thead><tbody><tr><td>Planner</td><td>Qwen2-VL 7B INT4</td><td>ReAct, 복잡 판단, 계획</td><td>느리지만 정확</td></tr><tr><td>Executor</td><td>Qwen2-VL 1.5B INT4</td><td>Tool, 단순 RAG, SQL</td><td>빠르고 저렴</td></tr><tr><td>Vision</td><td>Qwen2-VL 7B FP16</td><td>카메라, 환경 감지</td><td>Vision 시에만</td></tr></tbody></table></div>
+<div class="pn"><a onclick="go('agent')">← A2A Agent</a><a onclick="go('memory')">메모리 →</a></div></div>
+
+<div class="page" id="p-memory"><h1>06. 메모리 시스템</h1>
+<div class="table-wrap"><table><thead><tr><th>유형</th><th>구현</th><th>용도</th></tr></thead><tbody><tr><td>단기</td><td>ConversationBufferWindow</td><td>대화 컨텍스트, Multi-Turn 상태</td></tr><tr><td>장기</td><td>Vector Store Experience</td><td>Reflexion 경험 축적</td></tr><tr><td>엔티티</td><td>KV Store</td><td>개인화 응답</td></tr></tbody></table></div>
+<div class="pn"><a onclick="go('planexec')">← Plan-Execute</a><a onclick="go('graphrag')">Graph RAG →</a></div></div>
+
+<div class="page" id="p-graphrag"><h1>07. Knowledge Graph + Graph RAG</h1>
+<h2>7.1 차량 Knowledge Graph</h2>
+<div class="table-wrap"><table><thead><tr><th>Node</th><th>예시</th><th>Edge</th><th>연결</th></tr></thead><tbody><tr><td>Component</td><td>엔진오일, 브레이크, 타이어</td><td>HAS_PART, MAINTAINED_BY</td><td>System, Maintenance</td></tr><tr><td>WarningLight</td><td>엔진, ABS, 배터리</td><td>INDICATES, CAUSED_BY</td><td>Symptom, Component</td></tr><tr><td>Symptom</td><td>소음, 진동, 누유</td><td>SYMPTOM_OF, RESOLVED_BY</td><td>Component, Action</td></tr><tr><td>Maintenance</td><td>오일교환, 타이어교체</td><td>APPLIES_TO, HAS_INTERVAL</td><td>Component, Schedule</td></tr><tr><td>DTC Code</td><td>P0301, P0420</td><td>TRIGGERS, MAPS_TO</td><td>WarningLight, Component</td></tr></tbody></table></div>
+<h2>7.2 Graph RAG 파이프라인</h2>
+<ul class="fl"><li><strong>1. Vector RAG:</strong> bge-m3 + Qdrant로 관련 문서 추출</li><li><strong>2. Entity Extraction:</strong> 부품/경고등/증상 엔티티 추출</li><li><strong>3. Graph Traversal:</strong> Neo4j 1~2 hop 탐색</li><li><strong>4. Context Fusion:</strong> 벡터+그래프 결과 통합 → LLM 컨텍스트</li></ul>
+<div class="pn"><a onclick="go('memory')">← 메모리</a><a onclick="go('text2sql')">Text2SQL →</a></div></div>
+
+<div class="page" id="p-text2sql"><h1>08. Text2SQL Agent</h1>
+<h2>8.1 차량 DB</h2>
+<div class="table-wrap"><table><thead><tr><th>테이블</th><th>컬럼</th><th>설명</th><th>쿼리 예시</th></tr></thead><tbody><tr><td>vehicle_telemetry</td><td>ts, speed, rpm, fuel, battery, tire_*</td><td>실시간 센서</td><td>"어제 평균 속도?"</td></tr><tr><td>maintenance_log</td><td>date, mileage, type, parts, cost</td><td>정비 이력</td><td>"마지막 오일교환?"</td></tr><tr><td>dtc_codes</td><td>code, description, severity, resolved</td><td>OBD-II</td><td>"미해결 경고 목록"</td></tr><tr><td>trip_history</td><td>start, end, distance, avg_speed, fuel</td><td>운행 기록</td><td>"이번 달 총 거리?"</td></tr></tbody></table></div>
+<h2>8.2 파이프라인</h2>
+<ul class="fl"><li><strong>Schema Linking:</strong> 관련 테이블만 LLM에 제공</li><li><strong>Few-shot SQL:</strong> 유사 예시를 벡터 검색으로 제공</li><li><strong>Self-Consistency:</strong> N개 SQL → 다수결</li><li><strong>SQL 검증:</strong> 구문+EXPLAIN 후 실행</li></ul>
+<div class="pn"><a onclick="go('graphrag')">← Graph RAG</a><a onclick="go('toolcall')">Tool Calling →</a></div></div>
+
+<div class="page" id="p-toolcall"><h1>09. Multi-Turn Tool Calling + 실패 처리</h1><p class="lead">복수 Tool 순차/병렬 호출, 각 결과를 컨텍스트에 축적.</p>
+<div class="table-wrap"><table><thead><tr><th>실패 유형</th><th>감지</th><th>재시도</th><th>최대</th></tr></thead><tbody><tr><td>Tool 타임아웃</td><td>asyncio.wait_for</td><td>동일 Tool 재호출</td><td>2회</td></tr><tr><td>파라미터 오류</td><td>ToolResult.success=false</td><td>LLM에 오류전달 → 수정</td><td>2회</td></tr><tr><td>잘못된 Tool</td><td>결과 검증 실패</td><td>Supervisor 대안 제안</td><td>1회</td></tr><tr><td>SQL 오류</td><td>DB exception</td><td>스키마 재전달 → 재생성</td><td>3회</td></tr></tbody></table></div>
+<div class="pn"><a onclick="go('text2sql')">← Text2SQL</a><a onclick="go('eval')">평가 체계 →</a></div></div>
+
+<div class="page" id="p-eval"><h1>10. AI Agent 품질 평가 체계</h1>
+<h2>10.1 평가 모듈</h2>
+<div class="table-wrap"><table><thead><tr><th>모듈</th><th>설명</th><th>구현</th></tr></thead><tbody><tr><td>LLM-as-a-Judge</td><td>GPT-4o 1~10점 채점 + Pairwise</td><td>평가 프롬프트 + 자동 스코어링</td></tr><tr><td>Hallucination Detection</td><td>소스 대비 정합성 검증</td><td>NLI Entailment/Contradiction</td></tr><tr><td>CRAG</td><td>저품질 검색 → 재검색</td><td>Correct/Ambiguous/Incorrect</td></tr><tr><td>Gold Set</td><td>정답 데이터셋</td><td>200건: RAG80+Tool60+SQL40+복합20</td></tr></tbody></table></div>
+<h2>10.2 RAG 품질 메트릭</h2>
+<div class="table-wrap"><table><thead><tr><th>메트릭</th><th>정의</th><th>목표</th></tr></thead><tbody><tr><td>Faithfulness</td><td>응답이 컨텍스트에 근거한 비율</td><td>&gt; 0.90</td></tr><tr><td>Answer Relevancy</td><td>응답이 질문에 적합한 정도</td><td>&gt; 0.85</td></tr><tr><td>Context Recall</td><td>필요 컨텍스트 검색 비율</td><td>&gt; 0.90</td></tr><tr><td>Context Precision</td><td>검색 중 실제 관련 비율</td><td>&gt; 0.75</td></tr><tr><td>Text2SQL Accuracy</td><td>SQL 결과 기대값 일치</td><td>&gt; 80%</td></tr><tr><td>Graph RAG Accuracy</td><td>탐색 경로 일치</td><td>&gt; 85%</td></tr></tbody></table></div>
+<div class="pn"><a onclick="go('toolcall')">← Tool Calling</a><a onclick="go('schedule')">일정 →</a></div></div>
+
+<div class="page" id="p-schedule"><h1>11. 프로젝트 일정 (16주)</h1>
+<div class="table-wrap"><table><thead><tr><th>Phase</th><th>기간</th><th>주요 활동</th><th>산출물</th></tr></thead><tbody>
+<tr><td><span class="pb">Phase 1</span><br>VLM 배포</td><td>1~2주</td><td>TensorRT Edge-LLM 7B+1.5B, vLLM, Plan-and-Execute, 벤치마크</td><td>TensorRT 엔진, vLLM, 라우팅, 비용 리포트</td></tr>
+<tr><td><span class="pb">Phase 2</span><br>RAG+Graph+SQL</td><td>3~6주</td><td>Vehicle RAG, KG(Neo4j), Graph RAG, Text2SQL, Query Router</td><td>RAG+Graph RAG, KG, Text2SQL, DB</td></tr>
+<tr><td><span class="pb">Phase 3</span><br>Cog+A2A+Tool</td><td>7~10주</td><td>ReAct+Reflexion, Multi-Agent, A2A, MCP 12종, Multi-Turn, 메모리, 트리거</td><td>Cognitive Arch., A2A, MCP, 메모리</td></tr>
+<tr><td><span class="pb">Phase 4</span><br>평가 체계</td><td>11~12주</td><td>LLM-as-a-Judge, Hallucination, CRAG, Gold Set 200건, 대시보드</td><td>Gold Set, 평가 파이프라인, 대시보드</td></tr>
+<tr><td><span class="pb">Phase 5</span><br>통합+데모</td><td>13~16주</td><td>E2E 통합, React UI, AG-UI, 시나리오 8종, 리포트, 포트폴리오</td><td>통합 시스템, 데모, 리포트</td></tr>
+</tbody></table></div>
+<div class="info-box"><div class="boxtitle">Optional: Domain Fine-tuning (추가 2~4주)</div><p>nuScenes-QA 데이터셋 + QLoRA 파인튜닝 (A6000 48GB). base vs fine-tuned A/B 비교.</p></div>
+<div class="pn"><a onclick="go('eval')">← 평가 체계</a><a onclick="go('techstack')">기술 스택 →</a></div></div>
+
+<div class="page" id="p-techstack"><h1>12. 기술 스택</h1>
+<div class="table-wrap"><table><thead><tr><th>영역</th><th>기술</th></tr></thead><tbody>
+<tr><td>VLM</td><td>TensorRT Edge-LLM Qwen2-VL 7B+1.5B(INT4) / vLLM+AutoAWQ</td></tr>
+<tr><td>Agent</td><td>LangGraph StateGraph + A2A Protocol + MCP</td></tr>
+<tr><td>Cognitive</td><td>ReAct + Reflexion + Plan-and-Execute + CoT</td></tr>
+<tr><td>RAG</td><td>bge-m3 + bge-reranker-v2-m3 + Qdrant + CRAG</td></tr>
+<tr><td>Graph RAG</td><td>Neo4j + Entity Extraction + Traversal + Context Fusion</td></tr>
+<tr><td>Text2SQL</td><td>Few-shot + Self-Consistency + Schema Linking + SQLite</td></tr>
+<tr><td>메모리</td><td>단기(Buffer) + 장기(Vector) + 엔티티(KV)</td></tr>
+<tr><td>평가</td><td>LLM-as-a-Judge + Hallucination(NLI) + CRAG + Gold Set + 대시보드</td></tr>
+<tr><td>Frontend</td><td>React + Tailwind (Automotive Dark) + AG-UI + 평가 대시보드</td></tr>
+<tr><td>Infra</td><td>A6000 48GB, Ubuntu 22.04, Docker, Neo4j, Git, W&B</td></tr>
+</tbody></table></div>
+<div class="pn"><a onclick="go('schedule')">← 일정</a><a onclick="go('ref')">참고 문헌 →</a></div></div>
+
+<div class="page" id="p-ref"><h1>13. 참고 문헌</h1>
+<ul class="fl">
+<li><strong>[1]</strong> NVIDIA TensorRT Edge-LLM (GitHub) — EAGLE-3, NVFP4, CES 2026</li>
+<li><strong>[2]</strong> A2A Protocol v1.0 (Linux Foundation, Apr 2026) — 150+ 기업, Azure/AWS</li>
+<li><strong>[3]</strong> Google: Agent Protocols Guide (Mar 2026) — MCP+A2A+AG-UI</li>
+<li><strong>[4]</strong> MLMastery: 7 Agentic Trends 2026 — Plan-and-Execute</li>
+<li><strong>[5]</strong> IBM Think: AI Trends 2026 — Cooperative Model Routing</li>
+<li><strong>[6]</strong> ReAct (Yao 2023) / Reflexion (Shinn 2023) — Cognitive Architecture</li>
+<li><strong>[7]</strong> CRAG (Yan 2024) — Corrective RAG</li>
+<li><strong>[8]</strong> Arm On-Device Assistant (Sep 2025) — VLM+LLM, MCP, KV Cache</li>
+<li><strong>[9]</strong> Deloitte: Agentic AI Strategy (Feb 2026) — Toyota Agent</li>
+</ul>
+<div class="pn"><a onclick="go('techstack')">← 기술 스택</a><span></span></div></div>
+
+</main></div>
+<script>
+function go(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('p-'+id).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>{
+    if(n.getAttribute('onclick')&&n.getAttribute('onclick').includes("'"+id+"'"))n.classList.add('active');
+  });
+  window.scrollTo(0,0);
+  document.querySelector('.sidebar').classList.remove('open');
+}
+</script>
+</body>
+</html>
